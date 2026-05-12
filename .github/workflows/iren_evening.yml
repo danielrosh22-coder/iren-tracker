@@ -2,14 +2,18 @@ name: IREN Evening Close Check
 
 on:
   schedule:
-    # 20:30 UTC = 23:30 Israel (IDT)
-    - cron: '30 20 * * 1-5'
+    # 23:30 Israel = 20:30 UTC (summer)
+    # מריצים פעמיים, dedup ימנע כפילויות:
+    - cron: '25 20 * * 1-5'
+    - cron: '40 20 * * 1-5'
   workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,13 +27,51 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Check if close-check already ran today
+        id: dedup
+        run: |
+          if [ -f predictions_data.json ]; then
+            TODAY=$(date -u +%Y-%m-%d)
+            ALREADY_RAN=$(python -c "
+          import json
+          from datetime import datetime, timezone, timedelta
+          try:
+              data = json.load(open('predictions_data.json'))
+              now = datetime.now(timezone.utc)
+              # Check if any close_check_time in last 2 hours
+              for entry in data:
+                  ts = entry.get('close_check_time', '')
+                  if ts:
+                      try:
+                          dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                          if dt.tzinfo is None:
+                              dt = dt.replace(tzinfo=timezone.utc)
+                          if now - dt < timedelta(hours=2):
+                              print('yes')
+                              exit()
+                      except: pass
+              print('no')
+          except: print('no')
+          ")
+            echo "already_ran=$ALREADY_RAN" >> $GITHUB_OUTPUT
+            echo "Dedup check: $ALREADY_RAN"
+          else
+            echo "already_ran=no" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run evening close check
+        if: steps.dedup.outputs.already_ran != 'yes'
         env:
           IREN_TELEGRAM_BOT_TOKEN: ${{ secrets.IREN_TELEGRAM_BOT_TOKEN }}
           IREN_TELEGRAM_CHAT_ID: ${{ secrets.IREN_TELEGRAM_CHAT_ID }}
         run: python iren_close_check.py
 
+      - name: Skip notice
+        if: steps.dedup.outputs.already_ran == 'yes'
+        run: echo "✋ Close check already ran - skipping duplicate"
+
       - name: Commit results back to repo
+        if: steps.dedup.outputs.already_ran != 'yes'
         run: |
           git config user.name "IREN Bot"
           git config user.email "bot@iren-tracker.local"

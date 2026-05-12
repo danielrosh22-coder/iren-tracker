@@ -2,15 +2,20 @@ name: IREN Morning Prediction
 
 on:
   schedule:
-    # 13:00 UTC = 16:00 Israel (IDT, summer time)
-    # Mon-Fri only (1-5)
-    - cron: '0 13 * * 1-5'
+    # 16:00 Israel = 13:00 UTC (summer/IDT) or 14:00 UTC (winter/IST)
+    # מריצים פעמיים בקצרים כי GitHub cron יכול להתעכב 15-60 דק' בעומס:
+    # 12:55 UTC = 15:55 Israel | 13:10 UTC = 16:10 Israel
+    # אם הראשון רץ - השני יראה שיש תחזית מהיום ולא ישלח טלגרם פעמיים
+    - cron: '55 12 * * 1-5'
+    - cron: '10 13 * * 1-5'
   workflow_dispatch:  # מאפשר הרצה ידנית מהאתר
 
 jobs:
   predict:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,13 +29,53 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Check if already ran today (skip duplicate)
+        id: dedup
+        run: |
+          if [ -f predictions_data.json ]; then
+            TODAY=$(date -u +%Y-%m-%d)
+            ALREADY_RAN=$(python -c "
+          import json
+          from datetime import datetime, timezone, timedelta
+          try:
+              data = json.load(open('predictions_data.json'))
+              # Check if any prediction in last 4 hours
+              now = datetime.now(timezone.utc)
+              for entry in data:
+                  ts = entry.get('timestamp', '')
+                  if ts:
+                      try:
+                          # Handle naive timestamps as UTC
+                          dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+                          if dt.tzinfo is None:
+                              dt = dt.replace(tzinfo=timezone.utc)
+                          age = now - dt
+                          if age < timedelta(hours=4):
+                              print('yes')
+                              exit()
+                      except: pass
+              print('no')
+          except: print('no')
+          ")
+            echo "already_ran=$ALREADY_RAN" >> $GITHUB_OUTPUT
+            echo "Dedup check: $ALREADY_RAN"
+          else
+            echo "already_ran=no" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run morning prediction
+        if: steps.dedup.outputs.already_ran != 'yes'
         env:
           IREN_TELEGRAM_BOT_TOKEN: ${{ secrets.IREN_TELEGRAM_BOT_TOKEN }}
           IREN_TELEGRAM_CHAT_ID: ${{ secrets.IREN_TELEGRAM_CHAT_ID }}
         run: python iren_indicator.py
 
+      - name: Skip notice
+        if: steps.dedup.outputs.already_ran == 'yes'
+        run: echo "✋ Already ran in last 4 hours - skipping to avoid duplicate Telegram"
+
       - name: Commit results back to repo
+        if: steps.dedup.outputs.already_ran != 'yes'
         run: |
           git config user.name "IREN Bot"
           git config user.email "bot@iren-tracker.local"
