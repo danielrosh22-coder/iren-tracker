@@ -1,0 +1,39 @@
+name: IREN Morning Prediction
+
+on:
+  schedule:
+    # 13:00 UTC = 16:00 Israel (IDT, summer time)
+    # Mon-Fri only (1-5)
+    - cron: '0 13 * * 1-5'
+  workflow_dispatch:  # מאפשר הרצה ידנית מהאתר
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run morning prediction
+        env:
+          IREN_TELEGRAM_BOT_TOKEN: ${{ secrets.IREN_TELEGRAM_BOT_TOKEN }}
+          IREN_TELEGRAM_CHAT_ID: ${{ secrets.IREN_TELEGRAM_CHAT_ID }}
+        run: python iren_indicator.py
+
+      - name: Commit results back to repo
+        run: |
+          git config user.name "IREN Bot"
+          git config user.email "bot@iren-tracker.local"
+          git add LOG.md predictions_data.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Auto: morning prediction $(date -u +%Y-%m-%d)"
+          git push || true

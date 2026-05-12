@@ -1,0 +1,38 @@
+name: IREN Evening Close Check
+
+on:
+  schedule:
+    # 20:30 UTC = 23:30 Israel (IDT)
+    - cron: '30 20 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run evening close check
+        env:
+          IREN_TELEGRAM_BOT_TOKEN: ${{ secrets.IREN_TELEGRAM_BOT_TOKEN }}
+          IREN_TELEGRAM_CHAT_ID: ${{ secrets.IREN_TELEGRAM_CHAT_ID }}
+        run: python iren_close_check.py
+
+      - name: Commit results back to repo
+        run: |
+          git config user.name "IREN Bot"
+          git config user.email "bot@iren-tracker.local"
+          git add LOG.md predictions_data.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Auto: evening close $(date -u +%Y-%m-%d)"
+          git push || true

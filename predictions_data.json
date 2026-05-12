@@ -1,0 +1,465 @@
+[
+  {
+    "timestamp": "2026-05-04T15:03:17.199725",
+    "date": "2026-05-04",
+    "iren_price": 45.65999984741211,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 1,
+        "detail": "BTC שינוי: +0.31%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: +0.33%"
+      },
+      {
+        "name": "3. RSI",
+        "score": 0,
+        "detail": "RSI: 54.3"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 45.66 | MA20 44.55 | MA50 41.92"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": -2,
+        "detail": "חדשות: 2+ / 5- (net -3)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +3.68%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 0,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +0)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "פורמט תאריך לא ידוע"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-04T15:04:35.635696",
+    "date": "2026-05-04",
+    "iren_price": 45.65999984741211,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 1,
+        "detail": "BTC שינוי: +0.31%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: +0.33%"
+      },
+      {
+        "name": "3. RSI",
+        "score": 0,
+        "detail": "RSI: 54.3"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 45.66 | MA20 44.55 | MA50 41.92"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": -2,
+        "detail": "חדשות: 2+ / 5- (net -3)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +3.68%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 0,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +0)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד 2 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-04T15:13:04.664796",
+    "date": "2026-05-04",
+    "iren_price": 45.65999984741211,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 1,
+        "detail": "BTC שינוי: +0.33%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: +0.33%"
+      },
+      {
+        "name": "3. RSI",
+        "score": 0,
+        "detail": "RSI: 54.3"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 45.66 | MA20 44.55 | MA50 41.92"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": -2,
+        "detail": "חדשות: 2+ / 5- (net -3)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +3.68%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 0,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +0)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד 2 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית",
+    "actual_close": 45.65999984741211,
+    "actual_change_pct": 0.32960125557273984,
+    "verdict": "טעינו",
+    "close_check_time": "2026-05-04T15:19:25.926396"
+  },
+  {
+    "timestamp": "2026-05-05T11:54:02.982917",
+    "date": "2026-05-05",
+    "iren_price": 49.47999954223633,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 1,
+        "detail": "BTC שינוי: +1.25%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": -1,
+        "detail": "מומנטום אתמול: +8.37%"
+      },
+      {
+        "name": "3. RSI",
+        "score": 0,
+        "detail": "RSI: 53.5"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 49.48 | MA20 45.26 | MA50 42.11"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": -1,
+        "detail": "חדשות: 3+ / 4- (net -1)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +5.83%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 0,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +0)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד 1 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 3,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-07T14:17:28.522194",
+    "date": "2026-05-07",
+    "iren_price": 60.97999954223633,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 0,
+        "detail": "BTC שינוי: -0.66%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": -1,
+        "detail": "מומנטום אתמול: +11.40%"
+      },
+      {
+        "name": "3. RSI",
+        "score": -1,
+        "detail": "RSI: 67.2"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 60.98 | MA20 47.42 | MA50 42.66"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": 2,
+        "detail": "חדשות: 7+ / 0- (net +7)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +10.11%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 0,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +0)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד -1 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-07T14:19:47.206001",
+    "date": "2026-05-07",
+    "iren_price": 60.97999954223633,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 0,
+        "detail": "BTC שינוי: -0.66%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": -1,
+        "detail": "מומנטום אתמול: +11.40%"
+      },
+      {
+        "name": "3. RSI",
+        "score": -1,
+        "detail": "RSI: 67.2"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 60.98 | MA20 47.42 | MA50 42.66"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": 2,
+        "detail": "חדשות: 7+ / 0- (net +7)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +10.11%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 0,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +0)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד -1 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-12T10:00:30.823058",
+    "date": "2026-05-12",
+    "iren_price": 55.150001525878906,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 0,
+        "detail": "BTC שינוי: -0.91%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: -9.89%"
+      },
+      {
+        "name": "3. RSI",
+        "score": -1,
+        "detail": "RSI: 60.3"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 55.15 | MA20 50.11 | MA50 43.54"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": 2,
+        "detail": "חדשות: 6+ / 2- (net +4)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +3.00%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": -2,
+        "detail": "אנליסטים: 9 Buy / 2 Sell (שינוי: -2)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד -6 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-12T10:01:11.020630",
+    "date": "2026-05-12",
+    "iren_price": 55.150001525878906,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 0,
+        "detail": "BTC שינוי: -0.92%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: -9.89%"
+      },
+      {
+        "name": "3. RSI",
+        "score": -1,
+        "detail": "RSI: 60.3"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 55.15 | MA20 50.11 | MA50 43.54"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": 2,
+        "detail": "חדשות: 6+ / 2- (net +4)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +3.00%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": -2,
+        "detail": "אנליסטים: 9 Buy / 2 Sell (שינוי: -2)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד -6 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 4,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-05-12T10:05:59.130077",
+    "date": "2026-05-12",
+    "iren_price": 55.150001525878906,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": -1,
+        "detail": "BTC שינוי: -1.03%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: -9.89%"
+      },
+      {
+        "name": "3. RSI",
+        "score": -1,
+        "detail": "RSI: 60.3"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": 2,
+        "detail": "מחיר 55.15 | MA20 50.11 | MA50 43.54"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": 2,
+        "detail": "חדשות: 6+ / 2- (net +4)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +3.00%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": -2,
+        "detail": "אנליסטים: 9 Buy / 2 Sell (שינוי: -2)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד -6 ימים (2026-05-07)"
+      }
+    ],
+    "total_score": 3,
+    "emoji": "🟢",
+    "direction": "עלייה מתונה",
+    "confidence": "בינונית"
+  }
+]
