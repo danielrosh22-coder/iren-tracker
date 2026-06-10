@@ -1611,6 +1611,10 @@
     "total_score": 1,
     "emoji": "⚪",
     "direction": "ניטרלי - להמנע",
-    "confidence": "נמוכה"
+    "confidence": "נמוכה",
+    "actual_close": 51.52000045776367,
+    "actual_change_pct": -4.627915547602894,
+    "verdict": "ניטרלי",
+    "close_check_time": "2026-06-10T22:21:58.802138"
   }
 ]
