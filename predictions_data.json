@@ -2111,5 +2111,56 @@
     "actual_change_pct": -3.780548182806843,
     "verdict": "ניטרלי",
     "close_check_time": "2026-06-23T21:52:58.257188"
+  },
+  {
+    "timestamp": "2026-06-24T15:28:22.162800",
+    "date": "2026-06-24",
+    "iren_price": 52.33000183105469,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": -2,
+        "detail": "BTC שינוי: -3.03%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": 1,
+        "detail": "מומנטום אתמול: -4.37%"
+      },
+      {
+        "name": "3. RSI",
+        "score": 1,
+        "detail": "RSI: 35.5"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": -2,
+        "detail": "מחיר 52.33 | MA20 59.61 | MA50 54.86"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": 1,
+        "detail": "חדשות: 2+ / 1- (net +1)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": -2,
+        "detail": "ממוצע 5 peers: -3.37%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 1,
+        "detail": "אנליסטים: 11 Buy / 2 Sell (שינוי: +1)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד 63 ימים (2026-08-27)"
+      }
+    ],
+    "total_score": -2,
+    "emoji": "⚪",
+    "direction": "ניטרלי - להמנע",
+    "confidence": "נמוכה"
   }
 ]
