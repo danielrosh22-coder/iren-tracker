@@ -3701,6 +3701,10 @@
     "total_score": 4,
     "emoji": "🟢",
     "direction": "עלייה מתונה",
-    "confidence": "בינונית"
+    "confidence": "בינונית",
+    "actual_close": 39.75,
+    "actual_change_pct": 8.016306587225595,
+    "verdict": "צדקנו!",
+    "close_check_time": "2026-08-03T21:33:27.301680"
   }
 ]
