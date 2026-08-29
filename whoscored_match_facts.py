@@ -236,6 +236,78 @@ def collect_fixtures(page, day, verbose=False, dump_dir=None):
 
 # ---------------------------------------------------------- facts extraction
 
+FACTS_PANEL_JS = r"""
+() => {
+  const PAG = /(?:^|\s)(\d+)\s+of\s+(\d+)(?:\s|$)/;
+  const all = Array.from(document.querySelectorAll('*'));
+  const header = all.find(e => e.children.length === 0 &&
+                               e.textContent.trim().toLowerCase() === 'match facts');
+  if (!header) return null;
+
+  // מטפסים מהכותרת עד האלמנט שמכיל גם את מונה העמודים ("3 of 4")
+  let panel = header.parentElement, m = null;
+  for (let i = 0; i < 8 && panel; i++) {
+    m = (panel.innerText || '').match(PAG);
+    if (m) break;
+    panel = panel.parentElement;
+  }
+  if (!panel) panel = header.parentElement;
+  if (!panel) return null;
+
+  document.querySelectorAll('[data-ws-next]').forEach(e => e.removeAttribute('data-ws-next'));
+
+  let hasNext = false;
+  if (m) {
+    // כפתור "הבא" = הלחיץ הראשון מימין למונה העמודים
+    const pagEl = Array.from(panel.querySelectorAll('*')).filter(e =>
+      e.children.length === 0 && PAG.test(e.textContent.trim()) &&
+      e.textContent.trim().length < 14).pop();
+    if (pagEl) {
+      const box = pagEl.getBoundingClientRect();
+      const right = Array.from(panel.querySelectorAll('button,a,[role="button"]'))
+        .map(e => ({ e: e, b: e.getBoundingClientRect() }))
+        .filter(o => o.b.width > 0 && o.b.left >= box.right - 2)
+        .sort((x, y) => x.b.left - y.b.left);
+      if (right.length) { right[0].e.setAttribute('data-ws-next', '1'); hasNext = true; }
+    }
+  }
+  return { text: panel.innerText || '', page: m ? +m[1] : 1, total: m ? +m[2] : 1,
+           hasNext: hasNext };
+}
+"""
+
+ODDS_RE = re.compile(r"^(\d+/\d+|\d+(?:\.\d+)?|EVS)$", re.I)
+PAGINATION_RE = re.compile(r"^\d+\s+of\s+\d+$", re.I)
+# חצי הניווט של הקרוסלה (« ‹ › ») - שורות בלי אות או ספרה
+GLYPH_RE = re.compile(r"^[^0-9A-Za-z\u0590-\u05FF]+$")
+
+
+def parse_fact_cards(text):
+    """מפרק את טקסט הפאנל לכרטיסים: משפט-עובדה + ההימור והיחס שצמודים אליו."""
+    cards = []
+    current = None
+    for raw in (text or "").split("\n"):
+        line = clean(raw)
+        if not line or PAGINATION_RE.match(line) or GLYPH_RE.match(line):
+            continue
+        if line.lower() in ("match facts", "offers", "top players"):
+            continue
+        # משפט-עובדה: שורה ארוכה, לרוב מסתיימת בשם התחרות בסוגריים
+        if len(line) >= 45:
+            current = {"fact": line, "details": []}
+            cards.append(current)
+        elif current is not None and len(current["details"]) < 4:
+            current["details"].append(line)
+
+    for card in cards:
+        details = card.pop("details")
+        odds = ""
+        if details and ODDS_RE.match(details[-1]):
+            odds = details.pop()
+        card["bet"] = " · ".join(details)
+        card["odds"] = odds
+    return cards
+
 SECTIONS_JS = r"""
 (headers) => {
   const text = document.body.innerText || '';
@@ -279,29 +351,66 @@ def is_fact_line(line, teams_hint=""):
     return bool(tokens) and any(t.lower() in line.lower() for t in tokens) and line.endswith(".")
 
 
-def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None):
-    """נכנס לעמוד ה-Preview ומחזיר dict עם match facts + streaks."""
+def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None, max_pages=12):
+    """נכנס לעמוד ה-Preview ואוסף את כל עמודי הקרוסלה של Match Facts."""
     page.goto(url, wait_until="domcontentloaded", timeout=60000)
     try:
         page.wait_for_load_state("networkidle", timeout=15000)
     except Exception:
         pass
-    page.wait_for_timeout(1200)
+    try:
+        page.wait_for_selector("text=Match Facts", timeout=20000)
+    except Exception:
+        pass
+    page.wait_for_timeout(1000)
 
+    cards, seen = [], set()
+    total_pages, pages_read = 1, 0
+
+    for _ in range(max_pages):
+        panel = page.evaluate(FACTS_PANEL_JS)
+        if not panel:
+            break
+        total_pages = panel.get("total", 1) or 1
+        pages_read += 1
+        for card in parse_fact_cards(panel.get("text", "")):
+            if card["fact"] not in seen:
+                seen.add(card["fact"])
+                cards.append(card)
+        if panel.get("page", 1) >= total_pages or not panel.get("hasNext"):
+            break
+        before = panel.get("page", 1)
+        try:
+            page.click("[data-ws-next]", timeout=5000)
+        except Exception as exc:
+            if verbose:
+                log(f"   ↳ מעבר לעמוד הבא נכשל: {exc}")
+            break
+        # ממתינים שמונה העמודים יתקדם בפועל
+        moved = False
+        for _ in range(20):
+            page.wait_for_timeout(250)
+            probe = page.evaluate(FACTS_PANEL_JS)
+            if probe and probe.get("page", before) != before:
+                moved = True
+                break
+        if not moved:
+            break
+
+    facts = [c["fact"] for c in cards]
+
+    # גיבוי: מבנה עמוד אחר (למשל הגרסה הישנה) - חיתוך לפי כותרות מקטעים
     data = page.evaluate(SECTIONS_JS, SECTION_HEADERS)
     sections = data.get("sections", {})
     all_lines = data.get("all_lines", [])
-
-    facts = []
-    for key in ("match facts", "key facts", "match preview"):
-        for line in sections.get(key, []):
-            line = clean(line)
-            if line and not NOISE_RE.match(line) and len(line) >= 15:
-                facts.append(line)
-        if facts:
-            break
-
-    # fallback: אין כותרת "Match Facts" - מלקטים משפטי-עובדה מכל העמוד
+    if not facts:
+        for key in ("match facts", "key facts", "match preview"):
+            for line in sections.get(key, []):
+                line = clean(line)
+                if line and not NOISE_RE.match(line) and len(line) >= 15:
+                    facts.append(line)
+            if facts:
+                break
     used_fallback = False
     if not facts:
         used_fallback = True
@@ -310,6 +419,7 @@ def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None):
             if is_fact_line(line, teams_hint) and line not in facts:
                 facts.append(line)
         facts = facts[:8]
+        cards = [{"fact": f, "bet": "", "odds": ""} for f in facts]
 
     streaks = [clean(l) for l in sections.get("streaks", []) if clean(l)]
 
@@ -321,7 +431,8 @@ def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None):
         if verbose:
             log(f"   🐛 לא נמצאו עובדות - נשמר dump: {path}")
 
-    return {"facts": facts, "streaks": streaks, "fallback": used_fallback}
+    return {"facts": facts, "cards": cards, "streaks": streaks,
+            "fallback": used_fallback, "pages": pages_read, "pages_total": total_pages}
 
 
 # ------------------------------------------------------------------ scraping
@@ -380,11 +491,13 @@ def scrape(day, leagues=None, limit=0, headful=False, verbose=False,
                                         verbose=verbose, dump_dir=dump_dir)
                 except Exception as exc:
                     log(f"   ⚠️  שגיאה: {exc}")
-                    got = {"facts": [], "streaks": [], "fallback": False, "error": str(exc)}
+                    got = {"facts": [], "cards": [], "streaks": [],
+                           "fallback": False, "error": str(exc)}
                 fx.update(got)
                 results.append(fx)
                 if got.get("facts"):
-                    log(f"   ✅ {len(got['facts'])} עובדות")
+                    pages = got.get("pages_total", 1)
+                    log(f"   ✅ {len(got['facts'])} עובדות ({pages} עמודי קרוסלה)")
                 else:
                     log("   ➖ אין Match Facts")
                 if i < len(fixtures):
@@ -416,8 +529,11 @@ def render_text(results, day, include_streaks=False, only_with_facts=True):
             title = m["teams"] or m["row_text"] or f"Match {m['match_id']}"
             ko = f" ({m['kickoff']})" if m.get("kickoff") else ""
             lines.append(f"  • {title}{ko}")
-            for fact in m.get("facts", []):
-                lines.append(f"      - {fact}")
+            for card in m.get("cards") or [{"fact": f, "bet": "", "odds": ""}
+                                           for f in m.get("facts", [])]:
+                lines.append(f"      - {card['fact']}")
+                if card.get("bet") or card.get("odds"):
+                    lines.append(f"        ↳ {card.get('bet', '')} @ {card.get('odds', '-')}")
                 total += 1
             if include_streaks and m.get("streaks"):
                 lines.append(f"      רצפים: {' | '.join(m['streaks'][:6])}")
@@ -438,8 +554,10 @@ def render_markdown(results, day, include_streaks=False, only_with_facts=True):
             title = m["teams"] or m["row_text"] or f"Match {m['match_id']}"
             ko = f" — {m['kickoff']}" if m.get("kickoff") else ""
             lines.append(f"### [{title}]({m['url']}){ko}")
-            for fact in m.get("facts", []):
-                lines.append(f"- {fact}")
+            for card in m.get("cards") or [{"fact": f, "bet": "", "odds": ""}
+                                           for f in m.get("facts", [])]:
+                bet = f" — **{card['bet']} @ {card['odds']}**" if card.get("odds") else ""
+                lines.append(f"- {card['fact']}{bet}")
             if include_streaks and m.get("streaks"):
                 lines.append(f"- _Streaks:_ {' | '.join(m['streaks'][:6])}")
             lines.append("")

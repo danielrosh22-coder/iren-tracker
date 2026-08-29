@@ -148,9 +148,16 @@ python whoscored_match_facts.py --limit 5 --headful --verbose  # דיבאג
 ```
 ⚽ Match Facts · 29/08/2026
 🏆 England Premier League
-  • Liverpool Nottingham Forest (14:30)
-      - Liverpool have failed to win their last 5 matches in Premier League.
+  • Bournemouth Everton (15:00)
+      - Tyler Adams has won over 1.5 fouls in 3 of his last 3 appearances vs Everton
+        ↳ Tyler Adams Over 1.5 · Player Fouls Won @ 3/1
+      - There have been over 2.5 goals in 7 of the last 10 meetings between Bournemouth and Everton
+        ↳ Over 2.5 · Total Goals Over/Under @ 10/11
 ```
+
+ה-Match Facts באתר מפוזרות על קרוסלה של כמה עמודים לכל משחק (4-6 בדרך כלל,
+3 עובדות בעמוד). הכלי לוחץ על "הבא" עד סוף הקרוסלה ואוסף את כולן, יחד עם ההימור
+והיחס שצמודים לכל עובדה.
 
 ### דגלים שימושיים
 | דגל | מה זה עושה |
@@ -172,9 +179,9 @@ Workflow ידני: **Actions → WhoScored Match Facts → Run workflow**.
 `.github/workflows/whoscored_match_facts.yml`.
 
 ### מגבלות שכדאי להכיר
-- WhoScored מוגן ב-Incapsula ודורש **דפדפן אמיתי**, ולכן הכלי מבוסס Playwright
-  ולא בקשות HTTP. הרצה מכתובות IP של ענן (כולל GitHub Actions) עלולה להיחסם —
-  במקרה כזה הריצו מקומית, ועדיף עם `--headful`.
+- WhoScored מוגן ב-**Cloudflare** ודורש דפדפן אמיתי, ולכן הכלי מבוסס Playwright
+  ולא בקשות HTTP. **הרצה מ-GitHub Actions נחסמת בפועל** (`403 Attention Required!`,
+  נבדק ב-29/08/2026) — הכלי מיועד להרצה מקומית מהמחשב שלכם.
 - Match Facts הן תוכן **טרום-משחק**. הכי כדאי להריץ בבוקר, לפני שהמשחקים מתחילים.
 - הכלי מכבד את האתר: דפדפן אחד, בקשות סדרתיות והשהיה של 2-4 שניות בין משחקים.
 - אם WhoScored ישנה את מבנה העמוד, יש מנגנון גיבוי שמלקט משפטי-עובדה לפי תבנית
