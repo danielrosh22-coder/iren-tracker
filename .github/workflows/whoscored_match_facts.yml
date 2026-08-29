@@ -17,6 +17,9 @@ on:
         description: 'לשלוח לטלגרם?'
         type: boolean
         default: false
+  # דחיפה לברנץ' run-facts מריצה את הכלי מיד (דרך להפעיל בלי כפתור).
+  push:
+    branches: [ run-facts ]
   # schedule:
   #   - cron: '0 6 * * *'   # 09:00 שעון ישראל (קיץ)
 
@@ -43,7 +46,7 @@ jobs:
           IREN_TELEGRAM_CHAT_ID: ${{ secrets.IREN_TELEGRAM_CHAT_ID }}
           IN_DATE: ${{ inputs.date }}
           IN_LEAGUES: ${{ inputs.leagues }}
-          IN_TELEGRAM: ${{ inputs.telegram }}
+          IN_TELEGRAM: ${{ github.event_name == 'push' && 'true' || inputs.telegram }}
         run: |
           ARGS=()
           if [ -n "$IN_DATE" ]; then ARGS+=(--date "$IN_DATE"); fi
