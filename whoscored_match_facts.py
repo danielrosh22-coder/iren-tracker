@@ -245,34 +245,48 @@ FACTS_PANEL_JS = r"""
   if (!header) return null;
 
   // מטפסים מהכותרת עד האלמנט שמכיל גם את מונה העמודים ("3 of 4")
-  let panel = header.parentElement, m = null;
-  for (let i = 0; i < 8 && panel; i++) {
+  let panel = header.parentElement, m = null, hops = 0;
+  let widest = panel;
+  for (let i = 0; i < 12 && panel; i++) {
+    widest = panel;
     m = (panel.innerText || '').match(PAG);
-    if (m) break;
+    if (m) { hops = i; break; }
     panel = panel.parentElement;
   }
-  if (!panel) panel = header.parentElement;
+  if (!m) { panel = widest || header.parentElement; }
   if (!panel) return null;
 
   document.querySelectorAll('[data-ws-next]').forEach(e => e.removeAttribute('data-ws-next'));
 
-  let hasNext = false;
-  if (m) {
-    // כפתור "הבא" = הלחיץ הראשון מימין למונה העמודים
-    const pagEl = Array.from(panel.querySelectorAll('*')).filter(e =>
-      e.children.length === 0 && PAG.test(e.textContent.trim()) &&
-      e.textContent.trim().length < 14).pop();
-    if (pagEl) {
-      const box = pagEl.getBoundingClientRect();
-      const right = Array.from(panel.querySelectorAll('button,a,[role="button"]'))
-        .map(e => ({ e: e, b: e.getBoundingClientRect() }))
-        .filter(o => o.b.width > 0 && o.b.left >= box.right - 2)
-        .sort((x, y) => x.b.left - y.b.left);
-      if (right.length) { right[0].e.setAttribute('data-ws-next', '1'); hasNext = true; }
-    }
+  // מאתרים את אלמנט המונה עצמו
+  const counter = Array.from(panel.querySelectorAll('*')).filter(e =>
+    e.children.length === 0 && PAG.test(e.textContent.trim()) &&
+    e.textContent.trim().length < 14).pop();
+
+  const clickable = Array.from(panel.querySelectorAll('button,a,[role="button"]'))
+    .map(e => ({ e: e, b: e.getBoundingClientRect() }))
+    .filter(o => o.b.width > 0 && o.b.height > 0);
+
+  let nextEl = null;
+  if (counter) {
+    // כפתור "הבא" = הלחיץ הראשון מימין למונה
+    const box = counter.getBoundingClientRect();
+    const right = clickable
+      .filter(o => o.b.left >= box.right - 2 && Math.abs(o.b.top - box.top) < 60)
+      .sort((x, y) => x.b.left - y.b.left);
+    if (right.length) nextEl = right[0].e;
   }
+  if (!nextEl && clickable.length >= 4) {
+    // גיבוי: שורת ניווט של 4 כפתורים (« ‹ › ») - השלישי הוא "הבא"
+    const row = clickable.filter(o => o.b.width < 90 && o.b.height < 90)
+                         .sort((x, y) => x.b.top - y.b.top || x.b.left - y.b.left);
+    if (row.length >= 4) nextEl = row[row.length - 2].e;
+  }
+  if (nextEl) nextEl.setAttribute('data-ws-next', '1');
+
   return { text: panel.innerText || '', page: m ? +m[1] : 1, total: m ? +m[2] : 1,
-           hasNext: hasNext };
+           hasNext: !!nextEl, counter: counter ? counter.textContent.trim() : '',
+           hops: hops, clickables: clickable.length };
 }
 """
 
@@ -351,7 +365,8 @@ def is_fact_line(line, teams_hint=""):
     return bool(tokens) and any(t.lower() in line.lower() for t in tokens) and line.endswith(".")
 
 
-def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None, max_pages=12):
+def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None,
+                  max_pages=12, debug_panel=False):
     """נכנס לעמוד ה-Preview ואוסף את כל עמודי הקרוסלה של Match Facts."""
     page.goto(url, wait_until="domcontentloaded", timeout=60000)
     try:
@@ -360,6 +375,9 @@ def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None, max_pa
         pass
     try:
         page.wait_for_selector("text=Match Facts", timeout=20000)
+        page.get_by_text("Match Facts", exact=True).first.scroll_into_view_if_needed(
+            timeout=5000)
+        page.wait_for_timeout(900)
     except Exception:
         pass
     page.wait_for_timeout(1000)
@@ -370,7 +388,18 @@ def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None, max_pa
     for _ in range(max_pages):
         panel = page.evaluate(FACTS_PANEL_JS)
         if not panel:
+            if debug_panel:
+                log("   🐛 פאנל Match Facts לא נמצא כלל")
             break
+        if debug_panel and pages_read == 0:
+            log(f"   🐛 counter={panel.get('counter')!r} page={panel.get('page')} "
+                f"total={panel.get('total')} hasNext={panel.get('hasNext')} "
+                f"hops={panel.get('hops')} clickables={panel.get('clickables')}")
+            log("   🐛 ----- טקסט הפאנל -----")
+            for ln in (panel.get("text", "") or "").split("\n")[:60]:
+                if ln.strip():
+                    log(f"   🐛 | {ln.strip()}")
+            log("   🐛 ----------------------")
         total_pages = panel.get("total", 1) or 1
         pages_read += 1
         for card in parse_fact_cards(panel.get("text", "")):
@@ -438,7 +467,8 @@ def extract_facts(page, url, teams_hint="", verbose=False, dump_dir=None, max_pa
 # ------------------------------------------------------------------ scraping
 
 def scrape(day, leagues=None, limit=0, headful=False, verbose=False,
-           delay=(2.0, 4.0), dump_dir=None, timeout_per_match=60):
+           delay=(2.0, 4.0), dump_dir=None, timeout_per_match=60,
+           debug_panel=False):
     from playwright.sync_api import sync_playwright
 
     results = []
@@ -488,7 +518,8 @@ def scrape(day, leagues=None, limit=0, headful=False, verbose=False,
                 log(f"[{i}/{len(fixtures)}] {fx['competition']} · {label}")
                 try:
                     got = extract_facts(page, fx["url"], teams_hint=fx["teams"],
-                                        verbose=verbose, dump_dir=dump_dir)
+                                        verbose=verbose, dump_dir=dump_dir,
+                                        debug_panel=debug_panel)
                 except Exception as exc:
                     log(f"   ⚠️  שגיאה: {exc}")
                     got = {"facts": [], "cards": [], "streaks": [],
@@ -607,6 +638,8 @@ def main():
     ap.add_argument("--include-streaks", action="store_true", help="לצרף גם מקטע Streaks")
     ap.add_argument("--all-matches", action="store_true", help="להציג גם משחקים בלי עובדות")
     ap.add_argument("--dump-dir", help="תיקייה לשמירת טקסט עמודים שנכשלו (דיבאג)")
+    ap.add_argument("--debug-panel", action="store_true",
+                    help="להדפיס את טקסט פאנל ה-Match Facts ואת זיהוי הקרוסלה")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
@@ -620,6 +653,7 @@ def main():
         headful=args.headful,
         verbose=args.verbose,
         dump_dir=args.dump_dir,
+        debug_panel=args.debug_panel,
     )
     if not results:
         return 1
