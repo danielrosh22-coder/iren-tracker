@@ -169,17 +169,43 @@ def slug_to_teams(slug):
     return " ".join(w.capitalize() for w in m.group(1).split("-"))
 
 
-def collect_fixtures(page, day, verbose=False):
+def diagnose_page(page, response, dump_dir=None, tag="page"):
+    """מדפיס למה עמוד לא הניב תוצאות, ושומר את ה-HTML לבדיקה."""
+    status = response.status if response else "?"
+    try:
+        title = page.title()
+    except Exception:
+        title = "?"
+    try:
+        body = clean(page.inner_text("body"))
+    except Exception:
+        body = ""
+    log(f"   ↳ status={status} title={title!r}")
+    if body:
+        log(f"   ↳ טקסט העמוד: {body[:600]}")
+    else:
+        log("   ↳ העמוד ריק מטקסט (כנראה challenge של Incapsula)")
+    if dump_dir:
+        os.makedirs(dump_dir, exist_ok=True)
+        try:
+            with open(os.path.join(dump_dir, f"{tag}.html"), "w", encoding="utf-8") as fh:
+                fh.write(page.content())
+            log(f"   ↳ נשמר HTML מלא: {dump_dir}/{tag}.html")
+        except Exception as exc:
+            log(f"   ↳ שמירת HTML נכשלה: {exc}")
+
+
+def collect_fixtures(page, day, verbose=False, dump_dir=None):
     """טוען את עמוד המשחקים של התאריך ומחזיר רשימת משחקים."""
     urls = [
         f"{BASE}/livescores?d={day:%Y%m%d}",
         f"{BASE}/matches?d={day:%Y%m%d}",
         f"{BASE}/livescores",
     ]
-    for url in urls:
+    for idx, url in enumerate(urls, 1):
         log(f"📅 טוען רשימת משחקים: {url}")
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=60000)
+            response = page.goto(url, wait_until="domcontentloaded", timeout=60000)
         except Exception as exc:
             log(f"   ⚠️  טעינה נכשלה: {exc}")
             continue
@@ -187,8 +213,7 @@ def collect_fixtures(page, day, verbose=False):
             page.wait_for_selector('a[href*="/matches/"]', timeout=25000)
         except Exception:
             log("   ⚠️  לא נמצאו קישורי משחקים בעמוד (ייתכן חסימת בוט)")
-            if verbose:
-                log("   " + clean(page.inner_text("body"))[:400])
+            diagnose_page(page, response, dump_dir, tag=f"fixtures-{idx}")
             continue
         page.wait_for_timeout(2500)
         raw = page.evaluate(FIXTURES_JS)
@@ -331,7 +356,7 @@ def scrape(day, leagues=None, limit=0, headful=False, verbose=False,
         page.set_default_timeout(timeout_per_match * 1000)
 
         try:
-            fixtures = collect_fixtures(page, day, verbose=verbose)
+            fixtures = collect_fixtures(page, day, verbose=verbose, dump_dir=dump_dir)
             if not fixtures:
                 log("❌ לא נמצאו משחקים. ייתכן שהאתר חסם את הבקשה - נסו --headful.")
                 return []
