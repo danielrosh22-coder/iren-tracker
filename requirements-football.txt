@@ -1,0 +1,3 @@
+# תלויות עבור whoscored_match_facts.py (נפרד מהבוט של IREN)
+playwright>=1.44
+requests>=2.31.0

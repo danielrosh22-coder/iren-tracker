@@ -117,3 +117,65 @@ git push -u origin main
 ## 🎯 ניסוי
 
 זה ניסוי בלבד למתודולוגיית **8 פקטורים**. **לא** המלצת השקעה.
+
+---
+
+## ⚽ WhoScored Match Facts (כלי נפרד)
+
+`whoscored_match_facts.py` עובר על **כל משחקי היום** ב-WhoScored, נכנס לעמוד
+ה-Preview של כל משחק, ושולף את מקטע **Match Facts** (למשל: *"Liverpool have
+failed to win their last 5 matches in Premier League"*) — ומרכז את כולם לדוח אחד.
+
+### התקנה
+```bash
+pip install -r requirements-football.txt
+python -m playwright install chromium
+```
+
+### שימוש
+```bash
+python whoscored_match_facts.py                              # כל משחקי היום
+python whoscored_match_facts.py --date 2026-08-29            # תאריך אחר
+python whoscored_match_facts.py --leagues premier-league,laliga
+python whoscored_match_facts.py --format markdown --out facts.md
+python whoscored_match_facts.py --format json --out facts.json
+python whoscored_match_facts.py --telegram                   # שליחה לטלגרם
+python whoscored_match_facts.py --include-streaks            # גם רצפים (Unbeaten/Winless)
+python whoscored_match_facts.py --limit 5 --headful --verbose  # דיבאג
+```
+
+### פלט לדוגמה
+```
+⚽ Match Facts · 29/08/2026
+🏆 England Premier League
+  • Liverpool Nottingham Forest (14:30)
+      - Liverpool have failed to win their last 5 matches in Premier League.
+```
+
+### דגלים שימושיים
+| דגל | מה זה עושה |
+|-----|------------|
+| `--date` | תאריך היעד (`YYYY-MM-DD`), ברירת מחדל היום |
+| `--leagues` | סינון לפי מילים בשם הליגה, מופרד בפסיקים |
+| `--limit` | מקסימום משחקים (טוב לבדיקות) |
+| `--format` | `text` / `markdown` / `json` |
+| `--out`, `--json-out` | שמירה לקובץ |
+| `--telegram` | שליחה לטלגרם (משתמש באותם secrets של IREN) |
+| `--headful` | דפדפן גלוי — עוזר כשהאתר חוסם |
+| `--dump-dir` | שומר את טקסט העמוד כשלא נמצאו עובדות (דיבאג) |
+| `WS_CHROME_PATH` | משתנה סביבה להצבעה על בינארי כרום קיים |
+
+### הרצה מ-GitHub Actions
+Workflow ידני: **Actions → WhoScored Match Facts → Run workflow**.
+הדוח נשמר כ-artifact (`match_facts.md` + `match_facts.json`).
+להפעלה יומית אוטומטית — בטלו את ההערה משורות ה-`schedule` בקובץ
+`.github/workflows/whoscored_match_facts.yml`.
+
+### מגבלות שכדאי להכיר
+- WhoScored מוגן ב-Incapsula ודורש **דפדפן אמיתי**, ולכן הכלי מבוסס Playwright
+  ולא בקשות HTTP. הרצה מכתובות IP של ענן (כולל GitHub Actions) עלולה להיחסם —
+  במקרה כזה הריצו מקומית, ועדיף עם `--headful`.
+- Match Facts הן תוכן **טרום-משחק**. הכי כדאי להריץ בבוקר, לפני שהמשחקים מתחילים.
+- הכלי מכבד את האתר: דפדפן אחד, בקשות סדרתיות והשהיה של 2-4 שניות בין משחקים.
+- אם WhoScored ישנה את מבנה העמוד, יש מנגנון גיבוי שמלקט משפטי-עובדה לפי תבנית
+  לשונית; `--dump-dir` יראה בדיוק מה נקרא מהעמוד.
