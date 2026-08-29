@@ -19,7 +19,7 @@ on:
         default: false
   # דחיפה לברנץ' run-facts מריצה את הכלי מיד (דרך להפעיל בלי כפתור).
   push:
-    branches: [ run-facts ]
+    branches: [ 'run-facts*' ]
   # schedule:
   #   - cron: '0 6 * * *'   # 09:00 שעון ישראל (קיץ)
 
@@ -54,7 +54,7 @@ jobs:
           if [ "$IN_TELEGRAM" = "true" ]; then ARGS+=(--telegram); fi
           python whoscored_match_facts.py "${ARGS[@]}" \
             --format markdown --out match_facts.md \
-            --json-out match_facts.json --dump-dir dumps
+            --json-out match_facts.json --dump-dir dumps --verbose
 
       - name: Upload report
         if: always()
