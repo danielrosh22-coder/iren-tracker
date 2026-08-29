@@ -1,0 +1,65 @@
+name: WhoScored Match Facts
+
+# הרצה ידנית מהאתר (Actions -> WhoScored Match Facts -> Run workflow).
+# להפעלה אוטומטית יומית: בטלו את ההערה משורות ה-schedule.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'תאריך YYYY-MM-DD (ריק = היום)'
+        required: false
+        default: ''
+      leagues:
+        description: 'סינון ליגות, מופרד בפסיקים (ריק = כל המשחקים)'
+        required: false
+        default: ''
+      telegram:
+        description: 'לשלוח לטלגרם?'
+        type: boolean
+        default: false
+  # schedule:
+  #   - cron: '0 6 * * *'   # 09:00 שעון ישראל (קיץ)
+
+jobs:
+  facts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-football.txt
+          python -m playwright install --with-deps chromium
+
+      - name: Collect match facts
+        env:
+          IREN_TELEGRAM_BOT_TOKEN: ${{ secrets.IREN_TELEGRAM_BOT_TOKEN }}
+          IREN_TELEGRAM_CHAT_ID: ${{ secrets.IREN_TELEGRAM_CHAT_ID }}
+          IN_DATE: ${{ inputs.date }}
+          IN_LEAGUES: ${{ inputs.leagues }}
+          IN_TELEGRAM: ${{ inputs.telegram }}
+        run: |
+          ARGS=()
+          if [ -n "$IN_DATE" ]; then ARGS+=(--date "$IN_DATE"); fi
+          if [ -n "$IN_LEAGUES" ]; then ARGS+=(--leagues "$IN_LEAGUES"); fi
+          if [ "$IN_TELEGRAM" = "true" ]; then ARGS+=(--telegram); fi
+          python whoscored_match_facts.py "${ARGS[@]}" \
+            --format markdown --out match_facts.md \
+            --json-out match_facts.json --dump-dir dumps
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: match-facts
+          path: |
+            match_facts.md
+            match_facts.json
+            dumps/
+          if-no-files-found: ignore
