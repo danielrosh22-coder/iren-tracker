@@ -6690,6 +6690,10 @@
     "total_score": 3,
     "emoji": "🟢",
     "direction": "עלייה מתונה",
-    "confidence": "בינונית"
+    "confidence": "בינונית",
+    "actual_close": 27.729999542236328,
+    "actual_change_pct": 2.741755381228396,
+    "verdict": "צדקנו!",
+    "close_check_time": "2026-10-19T23:47:41.572741"
   }
 ]
