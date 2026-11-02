@@ -49,9 +49,9 @@ jobs:
                           if now - dt < timedelta(hours=2):
                               print('yes')
                               exit()
-                      except: pass
+                      except ValueError: pass
               print('no')
-          except: print('no')
+          except Exception: print('no')
           ")
             echo "already_ran=$ALREADY_RAN" >> $GITHUB_OUTPUT
             echo "Dedup check: $ALREADY_RAN"
