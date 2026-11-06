@@ -7390,5 +7390,56 @@
     "emoji": "🔴",
     "direction": "ירידה מתונה",
     "confidence": "בינונית"
+  },
+  {
+    "timestamp": "2026-11-06T19:44:43.161921",
+    "date": "2026-11-06",
+    "iren_price": 21.28499984741211,
+    "factors": [
+      {
+        "name": "1. כיוון BTC",
+        "score": 0,
+        "detail": "BTC שינוי: -0.37%"
+      },
+      {
+        "name": "2. מומנטום אתמול",
+        "score": -1,
+        "detail": "מומנטום אתמול: +18.05%"
+      },
+      {
+        "name": "3. RSI",
+        "score": 1,
+        "detail": "RSI: 38.6"
+      },
+      {
+        "name": "4. ממוצעים נעים",
+        "score": -2,
+        "detail": "מחיר 21.28 | MA20 26.48 | MA50 35.86"
+      },
+      {
+        "name": "5. חדשות/סנטימנט",
+        "score": -1,
+        "detail": "חדשות: 1+ / 2- (net -1)"
+      },
+      {
+        "name": "6. ביצועי Peers",
+        "score": 2,
+        "detail": "ממוצע 5 peers: +7.67%"
+      },
+      {
+        "name": "7. Analyst Actions",
+        "score": 1,
+        "detail": "אנליסטים: 16 Buy / 0 Sell (שינוי: +1)"
+      },
+      {
+        "name": "8. קרבת דוח",
+        "score": 0,
+        "detail": "דוח בעוד 89 ימים (2027-02-04)"
+      }
+    ],
+    "total_score": 0,
+    "emoji": "⚪",
+    "direction": "ניטרלי - להמנע",
+    "confidence": "נמוכה"
   }
 ]
